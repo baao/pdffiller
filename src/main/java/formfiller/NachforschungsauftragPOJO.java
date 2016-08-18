@@ -67,10 +67,6 @@ public class NachforschungsauftragPOJO {
         this.orderId = orderId;
     }
 
-    public NachforschungsauftragPOJO(String orderId) {
-        this.orderId = orderId;
-    }
-
     @FormField(name = "DHL Paket", isCheckBox = true, value = "On", equalField = "DHL Paket_2")
     public boolean isDhlPackage() {
         return dhlPackage;

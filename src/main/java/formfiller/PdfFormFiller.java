@@ -11,26 +11,41 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 
+/**
+ * Fill a pdf document's form with data provided in a POJO
+ */
 public final class PdfFormFiller {
     private String thisMoment;
     private PDDocument pdfDocument;
     private Method[] methods;
 
     public static void main(String[] a) throws Exception {
-        NachforschungsauftragPOJO nachforschungsauftragPOJO = new NachforschungsauftragPOJO("kljsdfls");
+        NachforschungsauftragPOJO nachforschungsauftragPOJO = new NachforschungsauftragPOJO();
         nachforschungsauftragPOJO.setAmountNachnahme("1000");
         new PdfFormFiller().fillAllFieldsWithTheirNames();
     }
 
     private PdfFormFiller() throws IOException {
-        this("/opt/IdeaProjects/Bewertungsmailer/src/main/resources/GKS_Nachforschungsauftrag.pdf");
+        this("/opt/IdeaProjects/pdffiller/src/main/resources/versErkl.pdf");
     }
 
+    /**
+     *
+     * @param pdfFile String
+     * @throws IOException IOException
+     */
     public PdfFormFiller(String pdfFile) throws IOException {
         setThisMoment();
         pdfDocument = PDDocument.load(new File(pdfFile));
     }
 
+    /**
+     *
+     * @param pojo Object
+     * @return PdfFormFiller
+     * @throws IOException
+     * @throws NoFormCouldBeFoundException
+     */
     public PdfFormFiller fill(Object pojo) throws IOException, NoFormCouldBeFoundException {
         if (this.methods == null) this.forSchema(pojo.getClass());
         PDAcroForm form = pdfDocument.getDocumentCatalog().getAcroForm();
@@ -60,6 +75,11 @@ public final class PdfFormFiller {
         return this;
     }
 
+    /**
+     *
+     * @throws IOException
+     * @throws NoFormCouldBeFoundException
+     */
     public void fillAllFieldsWithTheirNames() throws IOException, NoFormCouldBeFoundException {
         PDAcroForm form = pdfDocument.getDocumentCatalog().getAcroForm();
         if (form == null) throw new NoFormCouldBeFoundException();
@@ -78,25 +98,46 @@ public final class PdfFormFiller {
         this.save();
     }
 
+    /**
+     *
+     * @return the current time
+     */
     private String getThisMoment() {
         return thisMoment;
     }
 
+    /**
+     *
+     */
     private void setThisMoment() {
         this.thisMoment = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mmX")
                 .withZone(ZoneOffset.UTC)
                 .format(Instant.now());
     }
 
+    /**
+     *
+     * @return Method[] all the POJOs methods
+     */
     private Method[] getMethods() {
         return methods;
     }
 
+    /**
+     *
+     * @param forClass Object - a POJO
+     * @return PdfFormFiller
+     */
     public PdfFormFiller forSchema(Class forClass) {
         this.methods = forClass.getMethods();
         return this;
     }
 
+    /**
+     *
+     * @param fileName
+     * @return
+     */
     public boolean save(String fileName) {
         try {
             pdfDocument.save(fileName);
@@ -108,16 +149,37 @@ public final class PdfFormFiller {
         return true;
     }
 
+    /**
+     *
+     * @return boolean
+     * @throws IOException IOException
+     */
     public boolean save() throws IOException {
         return this.save(getThisMoment() + ".pdf");
     }
 
+    /**
+     *
+     * @param pojo Object
+     * @return boolean
+     * @throws IOException IOException
+     * @throws NoFormCouldBeFoundException NoFormCouldBeFoundException
+     */
     public boolean fillAndSave(Object pojo) throws IOException, NoFormCouldBeFoundException {
         return this
                 .fill(pojo)
                 .save();
     }
 
+
+    /**
+     *
+     * @param pojo Object
+     * @param outputFileName String
+     * @return boolean
+     * @throws IOException IOException
+     * @throws NoFormCouldBeFoundException NoFormCouldBeFoundException
+     */
     public boolean fillAndSave(Object pojo, String outputFileName) throws IOException, NoFormCouldBeFoundException {
         return this
                 .fill(pojo)
